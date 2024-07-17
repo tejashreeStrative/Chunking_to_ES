@@ -34,6 +34,10 @@ parser.add_argument('--index_name', type=str, default='Index1',
                     help='input ES index_name')
 parser.add_argument('--index_mapping', type=str, default='./sparse_encoder_1.txt',
                     help='index_mapping file path')
+parser.add_argument('--ES_username', type=str, default=None,
+                    help='elastic')
+parser.add_argument('--ES_password', type=str, default=None,
+                    help='11ilk50GgQJZ17RV7Zu7b2R0')
 
 
 args = parser.parse_args()
@@ -41,7 +45,6 @@ args = parser.parse_args()
 splitter_arg = args.splitter
 input_text = args.input_text
 file_path = args.file_path
-
 try:
     file_name = file_path.split('/')[-1]
 except Exception as e:
@@ -49,11 +52,15 @@ except Exception as e:
 
 # ES_CLOUD_ID="cfe0bcaa729d4702bbd84e5becdb08f7:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvJGQxZDE0MTZkNzIzMjQ0YWZiNDY0ZGJkNjEwYTAwZTIzJGFmNzNjYThhZTEyZTQ3ODliYjEyZjdlNGQ4ODNlMjAz"
 # ES_API_KEY="VWo4cjY0OEIyYUpJZzFTa09DbzM6YUpVOHl2TE5SZW1DaXJKajZtVzdBdw=="
-ES_CLOUD_ID=args.ES_CLOUD_ID #"9ceb45cca61b4ab1abcb2dc0b6132e7f:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvJGUzNTZiMTk2NDJiMzRiMTg5NmQ4NTIxODAzY2M3NzNlJGU2MzQ0NzhkN2M5YTRmZWY4ZWM5OGYzNmE4NDM4MDVh"
-ES_API_KEY=args.ES_API_KEY #"ZmtZY1VKQUJDdjUzXzZ2bzVMTUE6T0lHUHZnUWRUb3ExYzJpSDk2TTdiUQ=="
+# ES_CLOUD_ID=args.ES_CLOUD_ID #"9ceb45cca61b4ab1abcb2dc0b6132e7f:dXMtY2VudHJhbDEuZ2NwLmNsb3VkLmVzLmlvJGUzNTZiMTk2NDJiMzRiMTg5NmQ4NTIxODAzY2M3NzNlJGU2MzQ0NzhkN2M5YTRmZWY4ZWM5OGYzNmE4NDM4MDVh"
+# ES_API_KEY=args.ES_API_KEY #"ZmtZY1VKQUJDdjUzXzZ2bzVMTUE6T0lHUHZnUWRUb3ExYzJpSDk2TTdiUQ=="
+es_username = args.ES_username
+es_password = args.ES_password
+
 use_ELSER_model = args.ELSER_Model
 ## Replace elastic instance here
-# es_client = Elasticsearch("https://esuser:espassword8@eshost:port",  ca_certs=False, verify_certs=False)
+es_client = Elasticsearch(f"https://kb.strative.ai/esuser:{es_username}espassword8:{es_password}@eshost:port",  ca_certs=False, verify_certs=False)
+
 es_client = Elasticsearch(
     cloud_id=ES_CLOUD_ID,
     api_key=ES_API_KEY,
