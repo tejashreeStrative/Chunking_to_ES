@@ -18,7 +18,7 @@ import argparse
 from sentence_transformers import SentenceTransformer
 
 parser = argparse.ArgumentParser(description='Startive')
-parser.add_argument('--file_path', type=str, default='./sample-files/SCD-Tej.txt',
+parser.add_argument('--file_path', type=str, default='./nq-train-sample-250.jsonl',
                     help='the data path of file to be converted to vector embbedings')
 parser.add_argument('--splitter', type=str, default='HTMLTextSplitter',
                     help='splitter tp split document')
@@ -34,10 +34,14 @@ parser.add_argument('--index_name', type=str, default='Index1',
                     help='input ES index_name')
 parser.add_argument('--index_mapping', type=str, default='./sparse_encoder_1.txt',
                     help='index_mapping file path')
-parser.add_argument('--ES_username', type=str, default=None,
-                    help='elastic')
-parser.add_argument('--ES_password', type=str, default=None,
-                    help='11ilk50GgQJZ17RV7Zu7b2R0')
+parser.add_argument('--ES_username', type=str, default='elastic',
+                    help='ES_username')
+parser.add_argument('--ES_password', type=str, default='11ilk50GgQJZ17RV7Zu7b2R0',
+                    help='ES_password')
+parser.add_argument('--number_of_docs', type=str, default=None,
+                    help='number of documents to upload')
+parser.add_argument('--doc_num', type=str, default=None,
+                    help='Number of document to upload')
 
 
 args = parser.parse_args()
@@ -45,6 +49,8 @@ args = parser.parse_args()
 splitter_arg = args.splitter
 input_text = args.input_text
 file_path = args.file_path
+number_of_docs = args.number_of_docs
+doc_num = args.doc_num
 try:
     file_name = file_path.split('/')[-1]
 except Exception as e:
@@ -135,8 +141,8 @@ def create_index(index_name,mapping):
 def delete_index(index_name):
     es_client.indices.delete(index=index_name, ignore_unavailable=True)
 
-def index_data(df_docs,source,index_name_elser,index_name_knn):
-    docs = df_docs.iloc[:100].iterrows()
+def index_data(df_docs,source,index_name, number_of_docs):
+    docs = df_docs.iloc[:number_of_docs].iterrows()
     for index, row in docs:
         # i=i+1
         print("Processing i",index)
@@ -145,7 +151,7 @@ def index_data(df_docs,source,index_name_elser,index_name_knn):
         document_url = row['document_url']
         document_text = row['document_text'] # avail in simplified nq
 
-        splitter = "HTMLTextSplitter"
+        splitter = splitter_arg #"HTMLTextSplitter"
         text_chunks = langchain_split.split_input(splitter, None, document_text)
         # text_chunks = [document_text]
 
@@ -160,17 +166,17 @@ def index_data(df_docs,source,index_name_elser,index_name_knn):
                             "source": source
                 }
             
-            doc_knn ={
-                            "document_text": chunk,
-                            "document_title" : document_title,
-                            "example_id": example_id,
-                            "document_url": document_url,
-                            "source": source,
-                            "document_text_dense_embedding": chunk_text_dense_embedding
-                    }
-            response = es_client.index(index=index_name_elser, body=doc_elser)
+            # doc_knn ={
+            #                 "document_text": chunk,
+            #                 "document_title" : document_title,
+            #                 "example_id": example_id,
+            #                 "document_url": document_url,
+            #                 "source": source,
+            #                 "document_text_dense_embedding": chunk_text_dense_embedding
+            #         }
+            response = es_client.index(index=index_name, body=doc_elser)
             # print(response)
-            response = es_client.index(index=index_name_knn, body=doc_knn)
+            # response = es_client.index(index=index_name_knn, body=doc_knn)
             # print(response)           
 
 def index_data(index):
@@ -196,13 +202,14 @@ def index_data(index):
                         "document_url": document_url,
             }
         
-        doc_knn ={
-                        "document_text": chunk,
-                        "document_title" : document_title,
-                        "example_id": example_id,
-                        "document_url": document_url,
-                        "document_text_dense_embedding": chunk_text_dense_embedding
-                }
+        # doc_knn ={
+        #                 "document_text": chunk,
+        #                 "document_title" : document_title,
+        #                 "example_id": example_id,
+        #                 "document_url": document_url,
+        #                 "document_text_dense_embedding": chunk_text_dense_embedding
+        #         }
+        response = es_client.index(index=index_name, body=doc_elser)
 
 
 
@@ -222,6 +229,11 @@ sample_nq_corpus = pd.read_json(sample_nq_path, lines=True)
 
 # source ="Google NQ"
 # index_data(sample_nq_corpus, source, index_name_elser, index_name_knn)
+if number_of_docs: 
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        results = list(executor.map(index_data, range(number_of_docs)))
+elif doc_num:
+    index_data(doc_num)
+else:
+    print("Please provide number_of_docs or doc_num to be indexed")
 
-with concurrent.futures.ThreadPoolExecutor() as executor:
-    results = list(executor.map(index_data, range(100)))
