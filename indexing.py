@@ -28,7 +28,7 @@ parser.add_argument('--ES_CLOUD_ID', type=str, default=None,
                     help='Elastic Search CLOUD_ID')
 parser.add_argument('--ES_API_KEY', type=str, default=None,
                     help='Elastic Search API_KEY')
-parser.add_argument('--ELSER_Model', type=str, default=True,
+parser.add_argument('--ELSER_Model', type=bool, default=True,
                     help='Set True if you want to use Elser Elastic serach model')
 parser.add_argument('--index_name', type=str, default='Index1',
                     help='input ES index_name')
@@ -38,9 +38,9 @@ parser.add_argument('--ES_username', type=str, default='elastic',
                     help='ES_username')
 parser.add_argument('--ES_password', type=str, default='11ilk50GgQJZ17RV7Zu7b2R0',
                     help='ES_password')
-parser.add_argument('--number_of_docs', type=str, default=None,
+parser.add_argument('--number_of_docs', type=int, default=None,
                     help='number of documents to upload')
-parser.add_argument('--doc_num', type=str, default=None,
+parser.add_argument('--doc_num', type=int, default=None,
                     help='Number of document to upload')
 
 
